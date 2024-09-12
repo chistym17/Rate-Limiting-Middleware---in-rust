@@ -1,5 +1,4 @@
-use actix_web::cookie::time::error;
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
 use actix_service::{Service, Transform};
 use futures::future::{ok, Ready};
 use std::task::{Context, Poll};
@@ -13,7 +12,6 @@ pub struct RateLimitMiddleware<S>{
 }
 
 
-// Implementing the actix-web middleware trait
 impl<S, B> Transform<S, ServiceRequest> for RateLimiter
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
@@ -50,12 +48,10 @@ where
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        // This is where you check rate-limiting logic and call the next service in the chain
         let fut = self.service.lock().unwrap().call(req);
 
         Box::pin(async move {
             let res = fut.await?;
-            // Implement rate-limiting logic here
             Ok(res)
         })
     }
